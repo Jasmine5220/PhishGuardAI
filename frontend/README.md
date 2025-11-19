@@ -26,7 +26,7 @@ Unlike conventional "black-box" approaches, PhishGuard AI emphasizes interpretab
          │                       │                       │
          ▼                       ▼                       ▼
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Real-time     │    │   REST API      │    │   Pre-trained    │
+│   Real-time     │    │   REST API      │    │   Pre-trained   │
 │   Analysis      │    │   Endpoints     │    │   Models        │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
 ```

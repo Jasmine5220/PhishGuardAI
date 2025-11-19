@@ -29,6 +29,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Analyze current page
   function analyzeCurrentPage() {
+    const resultsContainer = document.getElementById('analysisResults');
+    if (resultsContainer) {
+      resultsContainer.style.display = 'block';
+    }
+
     chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
       const currentTab = tabs[0];
       if (!currentTab || !currentTab.url) {
@@ -150,77 +155,171 @@ document.addEventListener('DOMContentLoaded', function() {
     statusDiv.className = `status ${statusClass}`;
     statusDiv.innerHTML = `<span>${statusText}</span><span>${riskScore.toFixed(1)}%</span>`;
 
-    let message = `URL:\n${url}\n\nRisk Score: ${riskScore.toFixed(1)}%\n`;
-    if (Array.isArray(data.explanations) && data.explanations.length > 0) {
-      message += '\nReasons:\n';
-      data.explanations.forEach(explanation => {
-        message += `• ${explanation}\n`;
-      });
-    }
-    showMessage(message);
+    // Display results in the analysis container instead of popup
+    // Handle both URL-only analysis and combined analysis
+    const analysisData = {
+      url: url,
+      risk_score: riskScore,
+      combined_risk_score: data.combined_risk_score || riskScore,
+      is_phishing: isPhishing,
+      explanations: data.explanations || [],
+      email_analysis: data.email_analysis || null,
+      url_analyses: data.url_analyses || (url ? [{
+        url: url,
+        analysis: {
+          risk_score: riskScore,
+          is_phishing: isPhishing,
+          explanations: data.explanations || []
+        }
+      }] : []),
+      timestamp: data.timestamp || new Date().toISOString()
+    };
+
+    displayAnalysisInContainer(analysisData);
   }
 
-  // Show message to user
-  function showMessage(message) {
-    // Create a temporary message overlay
-    const overlay = document.createElement('div');
-    overlay.style.cssText = `
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.6);
-      z-index: 1000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+  // Display analysis results in the container
+  function displayAnalysisInContainer(analysis) {
+    const resultsContainer = document.getElementById('analysisResults');
+    const analysisContent = document.getElementById('analysisContent');
+    
+    if (!resultsContainer || !analysisContent) return;
+
+    // Show loading state
+    resultsContainer.style.display = 'block';
+    analysisContent.innerHTML = `
+      <div class="loading-state">
+        <div class="loading-spinner"></div>
+        <p>Analyzing...</p>
+      </div>
     `;
-    
-    const messageDiv = document.createElement('div');
-    messageDiv.style.cssText = `
-      background: linear-gradient(180deg, #121829, #0f1525);
-      color: #e6e9f0;
-      padding: 16px 18px;
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,0.08);
-      box-shadow: 0 16px 40px rgba(0,0,0,0.35);
-      max-width: 320px;
-      max-height: 240px;
-      overflow-y: auto;
-      white-space: pre-line;
-      font-size: 14px;
+
+    // Scroll to results
+    resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+    // Build HTML content
+    // Prefer combined_risk_score if available (for combined analysis), otherwise use risk_score
+    const riskScore = analysis.combined_risk_score !== undefined 
+      ? analysis.combined_risk_score 
+      : (analysis.risk_score || 0);
+    let riskClass = 'safe';
+    let statusText = '🟢 SAFE';
+    let statusIcon = '✅';
+
+    if (riskScore > 70) {
+      riskClass = 'danger';
+      statusText = '🚨 PHISHING DETECTED';
+      statusIcon = '🚨';
+    } else if (riskScore > 30) {
+      riskClass = 'warning';
+      statusText = '⚠️ SUSPICIOUS';
+      statusIcon = '⚠️';
+    }
+
+    let html = `
+      <div class="result-section">
+        <div class="risk-display ${riskClass}">
+          <h5>${statusIcon} ${statusText}</h5>
+          <div class="risk-score">Risk Score: ${riskScore.toFixed(1)}%</div>
+          <div class="progress-container">
+            <div class="progress-bar-container">
+              <div class="progress-bar ${riskClass}" style="width: ${riskScore}%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
     `;
-    messageDiv.textContent = message;
-    
-    const closeBtn = document.createElement('button');
-    closeBtn.textContent = 'Close';
-    closeBtn.style.cssText = `
-      display: inline-block;
-      margin-top: 12px;
-      padding: 8px 14px;
-      background: linear-gradient(135deg, #6c5ce7, #8a7ff0);
-      color: #fff;
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 10px;
-      cursor: pointer;
-      box-shadow: 0 8px 18px rgba(108,92,231,0.28);
+
+    // Add URL information if available
+    if (analysis.url) {
+      html += `
+        <div class="result-section">
+          <h4>🔗 URL Analyzed</h4>
+          <div class="url-item">
+            <div class="url-text">${analysis.url}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Add email analysis if available
+    if (analysis.email_analysis) {
+      html += `
+        <div class="result-section">
+          <h4>✉️ Email Analysis</h4>
+          <div class="url-item">
+            <div>Risk Score: <span class="url-score">${analysis.email_analysis.risk_score.toFixed(1)}%</span></div>
+            ${analysis.email_analysis.model_used ? `<div style="margin-top: 4px; font-size: 11px; color: var(--muted);">Model: ${analysis.email_analysis.model_used}</div>` : ''}
+          </div>
+        </div>
+      `;
+    }
+
+    // Add URL analyses if available
+    if (analysis.url_analyses && analysis.url_analyses.length > 0) {
+      html += `
+        <div class="result-section">
+          <h4>🔗 URL Analysis</h4>
+      `;
+      analysis.url_analyses.forEach(urlAnalysis => {
+        html += `
+          <div class="url-item">
+            <div class="url-text">${urlAnalysis.url}</div>
+            <div>Risk Score: <span class="url-score">${urlAnalysis.analysis.risk_score.toFixed(1)}%</span></div>
+          </div>
+        `;
+      });
+      html += `</div>`;
+    }
+
+    // Add explanations
+    const explanations = analysis.explanations || [];
+    if (explanations.length > 0) {
+      html += `
+        <div class="result-section">
+          <h4>💡 Explanations</h4>
+          <ul class="explanation-list">
+      `;
+      explanations.forEach(explanation => {
+        html += `<li class="explanation-item">${explanation}</li>`;
+      });
+      html += `
+          </ul>
+        </div>
+      `;
+    }
+
+    // Add timestamp
+    const timestamp = analysis.timestamp ? new Date(analysis.timestamp).toLocaleString() : new Date().toLocaleString();
+    html += `
+      <div class="timestamp">
+        <i class="fas fa-clock"></i> Analyzed at ${timestamp}
+      </div>
     `;
-    
-    closeBtn.addEventListener('click', () => {
-      document.body.removeChild(overlay);
-    });
-    
-    messageDiv.appendChild(closeBtn);
-    overlay.appendChild(messageDiv);
-    document.body.appendChild(overlay);
-    
-    // Auto-close after 5 seconds
+
+    // Update content
     setTimeout(() => {
-      if (document.body.contains(overlay)) {
-        document.body.removeChild(overlay);
-      }
-    }, 5000);
+      analysisContent.innerHTML = html;
+    }, 300);
+  }
+
+  // Show message to user (for errors only)
+  function showMessage(message) {
+    const resultsContainer = document.getElementById('analysisResults');
+    const analysisContent = document.getElementById('analysisContent');
+    
+    if (resultsContainer && analysisContent) {
+      resultsContainer.style.display = 'block';
+      analysisContent.innerHTML = `
+        <div class="error-state">
+          ${message}
+        </div>
+      `;
+      resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } else {
+      // Fallback to alert if container doesn't exist
+      alert(message);
+    }
   }
 
   // Check API connection status
@@ -236,6 +335,17 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('API connection failed:', error);
         showMessage('Warning: Cannot connect to PhishGuard AI server. Please ensure the Flask server is running.');
       });
+  }
+
+  // Close results button
+  const closeResultsBtn = document.getElementById('closeResults');
+  if (closeResultsBtn) {
+    closeResultsBtn.addEventListener('click', function() {
+      const resultsContainer = document.getElementById('analysisResults');
+      if (resultsContainer) {
+        resultsContainer.style.display = 'none';
+      }
+    });
   }
 
   // Check API status on popup open

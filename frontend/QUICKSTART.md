@@ -1,6 +1,6 @@
 # PhishGuard AI - Quick Start Guide
 
-## 🚀 Getting Started
+## Getting Started
 
 ### 1. Start the Flask Backend
 ```bash
@@ -25,7 +25,7 @@ The server will start on `http://localhost:5000`
    - 🟡 **SUSPICIOUS** - Medium risk  
    - 🔴 **PHISHING** - High risk
 
-## 🛡️ Features
+## Features
 
 ### Real-time Email Analysis
 - Automatically scans emails in Gmail and Outlook
@@ -42,7 +42,7 @@ The server will start on `http://localhost:5000`
 - Educational insights about phishing techniques
 - Transparent decision-making process
 
-## 📊 Web Dashboard
+## Web Dashboard
 
 Visit `http://localhost:5000` to access the web dashboard where you can:
 - Test email analysis with sample content
@@ -50,7 +50,7 @@ Visit `http://localhost:5000` to access the web dashboard where you can:
 - Learn about phishing indicators
 - Access Chrome extension information
 
-## ⚙️ Extension Settings
+## Extension Settings
 
 Click the PhishGuard AI icon in your browser toolbar to:
 - Enable/disable protection
@@ -58,7 +58,7 @@ Click the PhishGuard AI icon in your browser toolbar to:
 - Analyze current page content
 - Access the web dashboard
 
-## 🔧 Troubleshooting
+## Troubleshooting
 
 ### Extension Not Working?
 1. Ensure Flask server is running on localhost:5000
@@ -70,21 +70,21 @@ Click the PhishGuard AI icon in your browser toolbar to:
 2. Check if port 5000 is available
 3. Ensure no firewall blocking localhost connections
 
-## 📈 Performance
+## Performance
 
 - **Email Analysis:** < 2 seconds per email
 - **URL Scanning:** < 1 second per URL
 - **Accuracy:** 96.28% classification accuracy
 - **Memory Usage:** Minimal browser impact
 
-## 🔒 Privacy & Security
+## Privacy & Security
 
 - All analysis performed locally
 - No data sent to external servers
 - Email content processed in memory only
 - Secure local API communication
 
-## 📚 Learn More
+## Learn More
 
 - Check `frontend/README.md` for detailed documentation
 - Review `chrome-extension/README.md` for extension details

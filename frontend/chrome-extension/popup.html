@@ -196,6 +196,258 @@
       font-size: 11px;
       color: var(--muted);
     }
+
+    /* Analysis Results Container */
+    .analysis-results {
+      margin-top: 16px;
+      background: linear-gradient(180deg, var(--panel), var(--panel-2));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .analysis-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 16px;
+      background: rgba(255,255,255,0.04);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .analysis-header h3 {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .close-results {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 24px;
+      cursor: pointer;
+      padding: 0;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .close-results:hover {
+      background: rgba(255,255,255,0.1);
+      color: var(--text);
+    }
+
+    .analysis-content {
+      padding: 16px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .analysis-content::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .analysis-content::-webkit-scrollbar-track {
+      background: rgba(255,255,255,0.05);
+      border-radius: 3px;
+    }
+
+    .analysis-content::-webkit-scrollbar-thumb {
+      background: var(--primary);
+      border-radius: 3px;
+    }
+
+    .result-section {
+      margin-bottom: 16px;
+    }
+
+    .result-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .result-section h4 {
+      margin: 0 0 10px 0;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .risk-display {
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      margin-bottom: 12px;
+      border-left: 3px solid;
+    }
+
+    .risk-display.safe {
+      background: rgba(16, 185, 129, 0.1);
+      border-left-color: var(--success);
+      color: var(--success);
+    }
+
+    .risk-display.warning {
+      background: rgba(245, 158, 11, 0.1);
+      border-left-color: var(--warning);
+      color: var(--warning);
+    }
+
+    .risk-display.danger {
+      background: rgba(239, 68, 68, 0.1);
+      border-left-color: var(--danger);
+      color: var(--danger);
+    }
+
+    .risk-display h5 {
+      margin: 0 0 8px 0;
+      font-size: 14px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .risk-score {
+      font-size: 18px;
+      font-weight: 700;
+      margin-top: 4px;
+    }
+
+    .progress-container {
+      margin-top: 10px;
+    }
+
+    .progress-bar-container {
+      height: 8px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 6px;
+    }
+
+    .progress-bar {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+
+    .progress-bar.safe {
+      background: linear-gradient(90deg, var(--success), #34d399);
+    }
+
+    .progress-bar.warning {
+      background: linear-gradient(90deg, var(--warning), #fbbf24);
+    }
+
+    .progress-bar.danger {
+      background: linear-gradient(90deg, var(--danger), #f87171);
+    }
+
+    .url-item {
+      padding: 10px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      margin-bottom: 8px;
+      font-size: 12px;
+    }
+
+    .url-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .url-item .url-text {
+      color: var(--muted);
+      word-break: break-all;
+      margin-bottom: 6px;
+      font-size: 11px;
+    }
+
+    .url-item .url-score {
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .explanation-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .explanation-item {
+      padding: 10px 12px;
+      background: rgba(255,255,255,0.04);
+      border-left: 3px solid var(--primary);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      margin-bottom: 8px;
+      font-size: 12px;
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .explanation-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .loading-state {
+      text-align: center;
+      padding: 20px;
+      color: var(--muted);
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(108, 92, 231, 0.3);
+      border-radius: 50%;
+      border-top-color: var(--primary);
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 10px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .error-state {
+      padding: 12px;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: var(--radius-sm);
+      color: var(--danger);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .timestamp {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      font-size: 11px;
+      color: var(--muted);
+      text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -209,7 +461,7 @@
     </div>
   </div>
   
-  <div class="content">
+    <div class="content">
     <div id="status" class="status safe">
       <span>🟢 Protection Active</span>
       <span id="riskScore">0%</span>
@@ -244,6 +496,17 @@
     <button class="btn btn-secondary" id="openDashboard">
       📊 Open Dashboard
     </button>
+    
+    <!-- Analysis Results Container -->
+    <div id="analysisResults" class="analysis-results" style="display: none;">
+      <div class="analysis-header">
+        <h3>📊 Analysis Results</h3>
+        <button class="close-results" id="closeResults">×</button>
+      </div>
+      <div id="analysisContent" class="analysis-content">
+        <!-- Results will be inserted here -->
+      </div>
+    </div>
     
     <div class="settings">
       <div class="setting-item">
