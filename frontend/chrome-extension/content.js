@@ -16,102 +16,63 @@ class PhishGuardAnalyzer {
   }
 
   injectStyles() {
+    if (document.getElementById('phishguard-style-link') || document.getElementById('phishguard-inline-style')) {
+      return;
+    }
+
+    const runtimeAPI = (typeof chrome !== 'undefined' && chrome.runtime)
+      ? chrome
+      : (typeof browser !== 'undefined' && browser.runtime ? browser : null);
+
+    if (runtimeAPI?.runtime?.getURL) {
+      const link = document.createElement('link');
+      link.id = 'phishguard-style-link';
+      link.rel = 'stylesheet';
+      link.href = runtimeAPI.runtime.getURL('content.css');
+      document.head.appendChild(link);
+      return;
+    }
+
     const style = document.createElement('style');
+    style.id = 'phishguard-inline-style';
     style.textContent = `
       .phishguard-badge {
-        display: inline-block;
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-size: 12px;
-        font-weight: bold;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 700;
         margin-left: 8px;
         cursor: pointer;
-        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        background: rgba(255,255,255,0.8);
+        color: #1a1a1a;
+        border: 1px solid rgba(0,0,0,0.08);
       }
-      
+      .phishguard-badge .phishguard-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: currentColor;
+        box-shadow: 0 0 0 3px rgba(255,255,255,0.6);
+      }
       .phishguard-safe {
-        background-color: #d4edda;
-        color: #155724;
-        border: 1px solid #c3e6cb;
+        color: #0f5132;
+        border-color: rgba(15,81,50,0.2);
+        background: rgba(212,237,218,0.9);
       }
-      
       .phishguard-warning {
-        background-color: #fff3cd;
-        color: #856404;
-        border: 1px solid #ffeaa7;
+        color: #7f5200;
+        border-color: rgba(255,204,0,0.35);
+        background: rgba(255,243,205,0.95);
       }
-      
       .phishguard-danger {
-        background-color: #f8d7da;
-        color: #721c24;
-        border: 1px solid #f5c6cb;
-      }
-      
-      .phishguard-analysis-panel {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: white;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-        z-index: 10000;
-        max-width: 500px;
-        max-height: 80vh;
-        overflow-y: auto;
-        display: none;
-      }
-      
-      .phishguard-panel-header {
-        background: #f8f9fa;
-        padding: 15px;
-        border-bottom: 1px solid #ddd;
-        border-radius: 8px 8px 0 0;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-      
-      .phishguard-panel-content {
-        padding: 20px;
-      }
-      
-      .phishguard-panel-close {
-        background: none;
-        border: none;
-        font-size: 20px;
-        cursor: pointer;
-        color: #666;
-      }
-      
-      .phishguard-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.5);
-        z-index: 9999;
-        display: none;
-      }
-      
-      .phishguard-url-warning {
-        background: #fff3cd;
-        border: 1px solid #ffeaa7;
-        border-radius: 4px;
-        padding: 8px;
-        margin: 4px 0;
-        font-size: 12px;
-      }
-      
-      .phishguard-url-danger {
-        background: #f8d7da;
-        border: 1px solid #f5c6cb;
-        border-radius: 4px;
-        padding: 8px;
-        margin: 4px 0;
-        font-size: 12px;
+        color: #842029;
+        border-color: rgba(220,53,69,0.3);
+        background: rgba(248,215,218,0.95);
       }
     `;
     document.head.appendChild(style);
@@ -132,18 +93,29 @@ class PhishGuardAnalyzer {
       subtree: true
     });
 
-    // Handle clicks on analysis badges
+    // Handle clicks on analysis badges + overlay
     document.addEventListener('click', (e) => {
-      if (e.target.classList.contains('phishguard-badge')) {
+      const badgeTarget = e.target instanceof Element ? e.target.closest('.phishguard-badge') : null;
+      if (badgeTarget) {
         e.preventDefault();
-        this.showAnalysisPanel(e.target.dataset.analysisId);
+        this.showAnalysisPanel(badgeTarget.dataset.analysisId);
+        return;
+      }
+
+      if (e.target.classList && e.target.classList.contains('phishguard-overlay')) {
+        this.hideAnalysisPanel();
       }
     });
 
-    // Close panel when clicking overlay
-    document.addEventListener('click', (e) => {
-      if (e.target.classList.contains('phishguard-overlay')) {
-        this.hideAnalysisPanel();
+    // Support keyboard activation for badges
+    document.addEventListener('keydown', (e) => {
+      if (!['Enter', ' ', 'Spacebar'].includes(e.key)) {
+        return;
+      }
+      const badgeTarget = e.target instanceof Element ? e.target.closest('.phishguard-badge') : null;
+      if (badgeTarget) {
+        e.preventDefault();
+        this.showAnalysisPanel(badgeTarget.dataset.analysisId);
       }
     });
   }
@@ -304,7 +276,7 @@ class PhishGuardAnalyzer {
     if (riskScore > 70) {
       badgeClass = 'phishguard-danger';
       badgeText = 'PHISHING';
-    } else if (riskScore > 30) {
+    } else if (riskScore > 50) {
       badgeClass = 'phishguard-warning';
       badgeText = 'SUSPICIOUS';
     }
@@ -312,21 +284,25 @@ class PhishGuardAnalyzer {
     // Create badge
     const badge = document.createElement('span');
     badge.className = `phishguard-badge ${badgeClass}`;
-    badge.textContent = badgeText;
     badge.dataset.analysisId = analysisId;
+    badge.dataset.status = badgeText.toLowerCase();
     badge.title = `Risk Score: ${riskScore.toFixed(1)}% - Click for details`;
-
-    // Store analysis data
     badge.dataset.analysis = JSON.stringify(analysis);
+    badge.setAttribute('role', 'button');
+    badge.setAttribute('tabindex', '0');
+    badge.innerHTML = `
+      <span class="phishguard-dot" aria-hidden="true"></span>
+      <span class="phishguard-label-text">${badgeText}</span>
+    `;
 
     // Insert badge into email element
     const header = element.querySelector('.email-header, .message-header, [data-testid="message-header"]') || element;
     header.appendChild(badge);
 
-    // Add URL warnings if any URLs are suspicious
+    // Add URL warnings if any URLs are suspicious (threshold increased to 60)
     if (analysis.url_analyses && analysis.url_analyses.length > 0) {
       analysis.url_analyses.forEach(urlAnalysis => {
-        if (urlAnalysis.analysis.risk_score > 50) {
+        if (urlAnalysis.analysis && urlAnalysis.analysis.risk_score > 60) {
           this.addUrlWarning(element, urlAnalysis.url, urlAnalysis.analysis);
         }
       });
@@ -336,10 +312,22 @@ class PhishGuardAnalyzer {
   addUrlWarning(element, url, analysis) {
     const warning = document.createElement('div');
     warning.className = analysis.risk_score > 70 ? 'phishguard-url-danger' : 'phishguard-url-warning';
+    
+    // Truncate long URLs for display
+    const displayUrl = url.length > 60 ? url.substring(0, 60) + '...' : url;
+    
+    // Show only top 2 most critical explanations
+    let explanationText = '';
+    if (analysis.explanations && analysis.explanations.length > 0) {
+      const topExplanations = analysis.explanations.slice(0, 2);
+      explanationText = '<br><small style="color: #854d0e; font-size: 11px;">' + topExplanations.join(' • ') + '</small>';
+    }
+    
     warning.innerHTML = `
       <strong>⚠️ Suspicious URL Detected:</strong><br>
-      ${url}<br>
-      <small>Risk Score: ${analysis.risk_score.toFixed(1)}%</small>
+      <code style="font-size: 11px; word-break: break-all; color: #1a1a1a;">${displayUrl}</code><br>
+      <small style="color: #854d0e;">Risk Score: ${analysis.risk_score.toFixed(1)}%</small>
+      ${explanationText}
     `;
     
     // Insert warning before the email content
@@ -386,34 +374,119 @@ class PhishGuardAnalyzer {
       </div>
       <div class="phishguard-panel-content">
         <div class="${statusClass}" style="padding: 15px; border-radius: 5px; margin-bottom: 15px;">
-          <h4>${statusText}</h4>
-          <p><strong>Risk Score:</strong> ${riskScore.toFixed(1)}%</p>
+          <h4 style="color: #1a1a1a; font-weight: 700; margin: 0 0 8px 0; font-size: 18px;">${statusText}</h4>
+          <p style="color: #1a1a1a; font-size: 15px; margin: 0;"><strong style="color: #1a1a1a;">Risk Score:</strong> <span style="color: #1a1a1a; font-weight: 700; font-size: 16px;">${riskScore.toFixed(1)}%</span></p>
         </div>
         
         ${analysis.email_analysis ? `
-          <h5>📧 Email Analysis</h5>
-          <p><strong>Risk Score:</strong> ${analysis.email_analysis.risk_score.toFixed(1)}%</p>
+          <h5 style="color: #1a1a1a; font-weight: 700; margin-top: 15px; margin-bottom: 10px; font-size: 16px;">📧 Email Analysis</h5>
+          <div style="background: #f8f9fa; padding: 12px; border-radius: 5px; margin-bottom: 15px;">
+            <p style="color: #1a1a1a; font-size: 14px; margin: 5px 0;"><strong style="color: #1a1a1a;">Risk Score:</strong> <span style="color: #1a1a1a; font-weight: 600;">${analysis.email_analysis.risk_score.toFixed(1)}%</span></p>
+            ${analysis.email_analysis.explanations && analysis.email_analysis.explanations.length > 0 ? `
+              <div style="margin-top: 10px;">
+                ${analysis.email_analysis.explanations.slice(0, 3).map(exp => `
+                  <div style="color: #1a1a1a; font-size: 13px; margin: 4px 0; padding: 6px 10px; background: white; border-radius: 3px; border-left: 3px solid #6c5ce7;">
+                    ${exp}
+                  </div>
+                `).join('')}
+              </div>
+            ` : ''}
+          </div>
         ` : ''}
         
         ${analysis.url_analyses && analysis.url_analyses.length > 0 ? `
-          <h5>🔗 URL Analysis</h5>
-          ${analysis.url_analyses.map(urlAnalysis => `
-            <div style="margin: 10px 0; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
-              <strong>URL:</strong> ${urlAnalysis.url}<br>
-              <strong>Risk Score:</strong> ${urlAnalysis.analysis.risk_score.toFixed(1)}%
-            </div>
-          `).join('')}
+          <h5 style="color: #1a1a1a; font-weight: 700; margin-top: 15px; margin-bottom: 10px; font-size: 16px;">🔗 URL Analysis</h5>
+          ${(() => {
+            // Group URLs by risk level
+            const highRisk = analysis.url_analyses.filter(u => u.analysis && u.analysis.risk_score > 60);
+            const mediumRisk = analysis.url_analyses.filter(u => u.analysis && u.analysis.risk_score > 30 && u.analysis.risk_score <= 60);
+            const lowRisk = analysis.url_analyses.filter(u => u.analysis && u.analysis.risk_score <= 30);
+            const totalUrls = analysis.url_analyses.length;
+            
+            // Collect unique explanations
+            const allExplanations = new Set();
+            analysis.url_analyses.forEach(u => {
+              if (u.analysis && u.analysis.explanations) {
+                u.analysis.explanations.forEach(exp => allExplanations.add(exp));
+              }
+            });
+            const uniqueExplanations = Array.from(allExplanations).slice(0, 3);
+            
+            // Calculate average risk
+            const avgRisk = analysis.url_analyses.reduce((sum, u) => sum + (u.analysis?.risk_score || 0), 0) / totalUrls;
+            
+            let html = '';
+            
+            // Summary section
+            html += `<div style="margin: 10px 0; padding: 12px; border: 1px solid #ddd; border-radius: 5px; background: #f8f9fa;">
+              <p style="color: #1a1a1a; font-size: 14px; margin: 5px 0;"><strong style="color: #1a1a1a;">Total URLs Analyzed:</strong> <span style="color: #1a1a1a; font-weight: 600;">${totalUrls}</span></p>
+              <p style="color: #1a1a1a; font-size: 14px; margin: 5px 0;"><strong style="color: #1a1a1a;">Average Risk:</strong> <span style="color: #1a1a1a; font-weight: 600;">${avgRisk.toFixed(1)}%</span></p>`;
+            
+            if (highRisk.length > 0) {
+              html += `<p style="color: #dc3545; font-size: 13px; margin: 5px 0; font-weight: 600;">⚠️ ${highRisk.length} high-risk URL${highRisk.length > 1 ? 's' : ''} detected</p>`;
+            }
+            if (mediumRisk.length > 0) {
+              html += `<p style="color: #ffc107; font-size: 13px; margin: 5px 0;">⚠️ ${mediumRisk.length} medium-risk URL${mediumRisk.length > 1 ? 's' : ''} detected</p>`;
+            }
+            
+            // Show unique explanations
+            if (uniqueExplanations.length > 0) {
+              html += `<div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #ddd;">
+                <p style="color: #1a1a1a; font-size: 12px; font-weight: 600; margin-bottom: 6px;">Key Issues Found:</p>
+                ${uniqueExplanations.map(exp => `
+                  <div style="color: #1a1a1a; font-size: 12px; margin: 4px 0; padding: 6px 10px; background: white; border-radius: 3px; border-left: 3px solid #6c5ce7;">
+                    ${exp}
+                  </div>
+                `).join('')}
+              </div>`;
+            }
+            
+            html += `</div>`;
+            
+            // Only show individual URLs if there are high-risk ones (max 2)
+            if (highRisk.length > 0) {
+              html += `<div style="margin-top: 10px;">
+                <p style="color: #1a1a1a; font-size: 13px; font-weight: 600; margin-bottom: 8px;">High-Risk URLs:</p>
+                ${highRisk.slice(0, 2).map(urlAnalysis => {
+                  const domain = urlAnalysis.url.match(/https?:\/\/([^\/]+)/)?.[1] || urlAnalysis.url.substring(0, 40);
+                  return `
+                    <div style="margin: 8px 0; padding: 10px; border: 1px solid #dc3545; border-radius: 4px; background: #fff5f5;">
+                      <p style="color: #1a1a1a; font-size: 12px; margin: 3px 0; word-break: break-all; overflow-wrap: break-word;">
+                        <code style="color: #dc3545; background: white; padding: 2px 6px; border-radius: 3px; font-size: 11px; max-width: 100%; display: inline-block;">${domain}${urlAnalysis.url.length > 40 ? '...' : ''}</code>
+                      </p>
+                      <p style="color: #dc3545; font-size: 12px; margin: 3px 0; font-weight: 600;">Risk: ${urlAnalysis.analysis.risk_score.toFixed(1)}%</p>
+                    </div>
+                  `;
+                }).join('')}
+                ${highRisk.length > 2 ? `<p style="color: #666; font-size: 11px; margin-top: 5px;">+ ${highRisk.length - 2} more high-risk URL${highRisk.length - 2 > 1 ? 's' : ''}</p>` : ''}
+              </div>`;
+            }
+            
+            return html;
+          })()}
         ` : ''}
         
         ${analysis.explanations && analysis.explanations.length > 0 ? `
-          <h5>💡 Explanations</h5>
-          <ul>
-            ${analysis.explanations.map(explanation => `<li>${explanation}</li>`).join('')}
+          <h5 style="color: #1a1a1a; font-weight: 700; margin-top: 20px; margin-bottom: 12px; font-size: 16px;">💡 Combined Analysis Summary</h5>
+          <ul style="list-style: none; padding: 0; margin: 0;">
+            ${(() => {
+              // Remove duplicates and limit to 5 most important
+              const uniqueExplanations = [...new Set(analysis.explanations)].slice(0, 5);
+              return uniqueExplanations.map(explanation => {
+                // Shorten long explanations
+                const shortExp = explanation.length > 80 ? explanation.substring(0, 80) + '...' : explanation;
+                return `
+                  <li style="background: #f8f9fa; border-left: 4px solid #6c5ce7; padding: 10px 14px; margin: 6px 0; border-radius: 4px; color: #1a1a1a; font-size: 13px; font-weight: 500; line-height: 1.5; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                    ${shortExp}
+                  </li>
+                `;
+              }).join('');
+            })()}
           </ul>
         ` : ''}
         
-        <div style="margin-top: 20px; font-size: 12px; color: #666;">
-          <strong>Analyzed:</strong> ${new Date(analysis.timestamp).toLocaleString()}
+        <div style="margin-top: 20px; font-size: 12px; color: #1a1a1a; opacity: 0.7;">
+          <strong style="color: #1a1a1a;">Analyzed:</strong> ${new Date(analysis.timestamp).toLocaleString()}
         </div>
       </div>
     `;

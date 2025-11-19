@@ -27,54 +27,62 @@ email_model = None
 url_model = None
 tfidf_vectorizer = None
 
-# Try to import FeatureExtraction from existing project code
+# Import FeatureExtraction from existing project code
 FeatureExtraction = None
 try:
     project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-    phishing_detector_path = os.path.join(project_root, 'Phishing-detector')
-    if phishing_detector_path not in sys.path:
-        sys.path.insert(0, phishing_detector_path)
+    if project_root not in sys.path:
+        sys.path.insert(0, project_root)
     from feature import FeatureExtraction as _FeatureExtraction
     FeatureExtraction = _FeatureExtraction
-    print("✅ FeatureExtraction loaded from Phishing-detector/feature.py")
+    print("FeatureExtraction loaded from ../feature.py")
 except Exception as _e:
-    print(f"⚠️ Could not import FeatureExtraction: {_e}")
+    print(f"Could not import FeatureExtraction: {_e}")
 
 def load_models():
     """Load pre-trained models"""
     global email_model, url_model, tfidf_vectorizer
     
     try:
-        # Load email classification model
-        email_model_path = '../Phishing-detector/newmodel.pkl'
+        # Load email classification model (SVM with TF-IDF from emails_.ipynb)
+        email_model_path = './svm_email_classifier.pkl'
         if os.path.exists(email_model_path):
-            email_model = joblib.load(email_model_path)
-            print("✅ Email model loaded successfully")
+            try:
+                email_model = joblib.load(email_model_path)
+                print(f"✅ Email model (SVM + TF-IDF) loaded successfully from {email_model_path}")
+                # Verify it's a pipeline
+                if hasattr(email_model, 'named_steps'):
+                    print(f"   Model type: Pipeline with steps: {list(email_model.named_steps.keys())}")
+            except Exception as e:
+                print(f"❌ Failed to load email model from {email_model_path}: {e}")
+                email_model = None
         else:
-            print("⚠️ Email model not found, using heuristic analysis")
+            print(f"⚠  Email model not found at {email_model_path}, using heuristic analysis")
+            print(f"   Expected: SVM model trained on TF-IDF features (max_features=1000, ngram_range=(1,2))")
             
-        # Load URL model (trained RandomForest from training.ipynb)
-        # Prefer random_forest_model.pkl; fallback to url_model.pkl if present
-        candidate_paths = [
-            '../Phishing-detector/random_forest_model.pkl',
-            '../Phishing-detector/url_model.pkl',
-            'random_forest_model.pkl'
-        ]
-        for p in candidate_paths:
-            if os.path.exists(p):
-                try:
-                    with open(p, 'rb') as f:
-                        url_model = pickle.load(f)
-                    print(f"✅ URL model loaded successfully from {p}")
-                    break
-                except Exception as e:
-                    print(f"⚠️ Failed to load URL model from {p}: {e}")
-        if url_model is None:
-            print("⚠️ URL model not found, using heuristic analysis")
+        # Load URL model (trained RandomForest)
+        url_model_path = './random_forest_model.pkl'
+    
+        if os.path.exists(url_model_path):
+            try:
+                with open(url_model_path, 'rb') as f:
+                    url_model = pickle.load(f)
+                print(f"✅ URL model (RandomForest) loaded successfully from {url_model_path}")
+            except Exception as e:
+                print(f"❌ Failed to load URL model from {url_model_path}: {e}")
+                url_model = None
+        else:
+            print(f"⚠  URL model not found at {url_model_path}, using heuristic analysis")
+            
+        # Summary
+        print("\n📊 Model Status Summary:")
+        print(f"   Email Model: {'✅ Loaded' if email_model is not None else '⚠  Using Heuristics'}")
+        print(f"   URL Model: {'✅ Loaded' if url_model is not None else '⚠  Using Heuristics'}")
+        print(f"   FeatureExtraction: {'✅ Available' if FeatureExtraction is not None else '⚠  Not Available'}")
             
     except Exception as e:
         print(f"❌ Error loading models: {str(e)}")
-        print("🔄 Continuing with heuristic analysis only")
+        print("Continuing with heuristic analysis only")
 
 # Feature names aligned with training dataset order
 URL_FEATURE_NAMES = [
@@ -236,27 +244,80 @@ def analyze_url_heuristics(url):
     }
 
 def analyze_email_content(email_text):
-    """Analyze email content for phishing indicators"""
+    """Analyze email content for phishing indicators using trained SVM model"""
     if not email_text:
         return {'error': 'No email content provided'}
     
-    # Basic text preprocessing
-    email_text = str(email_text).lower().strip()
+    # Preprocess text to match notebook preprocessing
+    # Notebook uses: lowercase, strip, remove empty strings
+    processed_text = str(email_text).lower().strip()
     
-    # Heuristic analysis
+    if not processed_text or len(processed_text) == 0:
+        return {'error': 'Email text is empty after preprocessing'}
+    
+    # Try to use trained SVM model first
+    if email_model is not None:
+        try:
+            # The email_model is a pipeline with TF-IDF + SVM
+            # It expects text input and outputs prediction (0 = non-spam, 1 = spam)
+            prediction = email_model.predict([processed_text])[0]
+            
+            # Get feature importance if available (for explanations)
+            explanations = []
+            
+            # Map prediction to risk score
+            # 0 = non-spam (safe), 1 = spam (phishing)
+            if prediction == 1:
+                risk_score = 85.0  # High risk for spam/phishing
+                is_phishing = True
+                explanations.append("AI model detected phishing/spam indicators in email content")
+                
+                # Add heuristic-based explanations for context
+                urgency_words = ['urgent', 'immediately', 'asap', 'expires', 'limited time', 'act now']
+                if any(word in processed_text for word in urgency_words):
+                    explanations.append("Contains urgency-inducing language")
+                
+                financial_words = ['money', 'cash', 'dollars', 'investment', 'guaranteed', 'profit', 'winner', 'prize']
+                if any(word in processed_text for word in financial_words):
+                    explanations.append("Contains financial or prize-related terms")
+                
+                suspicious_phrases = [
+                    'click here', 'verify account', 'update information', 'confirm details',
+                    'suspended account', 'security breach', 'unusual activity'
+                ]
+                if any(phrase in processed_text for phrase in suspicious_phrases):
+                    explanations.append("Contains suspicious phrases commonly used in phishing")
+            else:
+                risk_score = 15.0  # Low risk for non-spam
+                is_phishing = False
+                explanations.append("AI model classified email as legitimate")
+            
+            return {
+                'risk_score': float(risk_score),
+                'is_phishing': is_phishing,
+                'confidence': 0.96,  # Model accuracy from notebook
+                'explanations': explanations,
+                'model_used': 'SVM_TFIDF',
+                'prediction': int(prediction)
+            }
+        except Exception as e:
+            print(f"Error using email model: {e}")
+            # Fall through to heuristic analysis
+    
+    # Fallback to heuristic analysis if model not available or fails
     risk_score = 0
     explanations = []
     
     # Urgency indicators
     urgency_words = ['urgent', 'immediately', 'asap', 'expires', 'limited time', 'act now']
-    urgency_count = sum(1 for word in urgency_words if word in email_text)
+    urgency_count = sum(1 for word in urgency_words if word in processed_text)
     if urgency_count > 0:
         risk_score += urgency_count * 10
         explanations.append(f"Contains {urgency_count} urgency indicators")
     
     # Financial terms
     financial_words = ['money', 'cash', 'dollars', 'investment', 'guaranteed', 'profit']
-    financial_count = sum(1 for word in financial_words if word in email_text)
+    financial_count = sum(1 for word in financial_words if word in processed_text)
     if financial_count > 0:
         risk_score += financial_count * 8
         explanations.append(f"Contains {financial_count} financial terms")
@@ -266,14 +327,14 @@ def analyze_email_content(email_text):
         'click here', 'verify account', 'update information', 'confirm details',
         'suspended account', 'security breach', 'unusual activity'
     ]
-    phrase_count = sum(1 for phrase in suspicious_phrases if phrase in email_text)
+    phrase_count = sum(1 for phrase in suspicious_phrases if phrase in processed_text)
     if phrase_count > 0:
         risk_score += phrase_count * 12
         explanations.append(f"Contains {phrase_count} suspicious phrases")
     
     # Grammar and spelling errors (basic check)
     common_errors = ['recieve', 'seperate', 'definately', 'occured']
-    error_count = sum(1 for error in common_errors if error in email_text)
+    error_count = sum(1 for error in common_errors if error in processed_text)
     if error_count > 0:
         risk_score += error_count * 5
         explanations.append(f"Contains {error_count} common spelling errors")
@@ -282,10 +343,11 @@ def analyze_email_content(email_text):
     risk_score = min(risk_score, 100)
     
     return {
-        'risk_score': risk_score,
+        'risk_score': float(risk_score),
         'is_phishing': risk_score > 40,
         'confidence': min(risk_score / 10, 1.0),
-        'explanations': explanations
+        'explanations': explanations,
+        'model_used': 'heuristic'
     }
 
 @app.route('/')
@@ -425,9 +487,10 @@ def get_explanations():
         }
     }
     return jsonify(explanations)
-
 if __name__ == '__main__':
-    print("🚀 Starting PhishGuard AI Backend...")
+    print("Starting PhishGuard AI Backend...")
     load_models()
-    print("🌐 Server running on http://localhost:5000")
+    print("Server running on http://localhost:5000")
     app.run(debug=True, host='0.0.0.0', port=5000)
+
+
