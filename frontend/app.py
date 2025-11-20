@@ -45,7 +45,7 @@ def load_models():
     
     try:
         # Load email classification model (SVM with TF-IDF from emails_.ipynb)
-        email_model_path = './svm_email_classifier.pkl'
+        email_model_path = './svm_email_classifier/svm_email_classifier.pkl'
         if os.path.exists(email_model_path):
             try:
                 email_model = joblib.load(email_model_path)
