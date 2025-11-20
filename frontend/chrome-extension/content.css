@@ -1,0 +1,230 @@
+/* PhishGuard AI Chrome Extension - Content Styles */
+
+
+/* Modern glassmorphism aesthetic */
+.phishguard-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px 10px 14px;
+  border-radius: 24px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-left: 40px;
+  margin-right: 0;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.3s ease;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: rgba(255,255,255,0.9);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border: 1px solid rgba(255,255,255,0.7);
+  color: #0f1525;
+  vertical-align: middle;
+  white-space: nowrap;
+  line-height: 1.3;
+  min-height: 36px;
+  position: relative;
+}
+
+.phishguard-badge i {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  opacity: 0.95;
+  width: 16px;
+  height: 16px;
+}
+.phishguard-badge:hover { transform: translateY(-1px); }
+.phishguard-badge:focus-visible {
+  outline: 2px solid rgba(108,92,231,0.6);
+  outline-offset: 2px;
+}
+.phishguard-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.4);
+  flex-shrink: 0;
+}
+.phishguard-label-text {
+  font-size: 13px;
+  line-height: 1.3;
+  letter-spacing: 1px;
+  font-weight: 600;
+  padding-left: 2px;
+}
+
+.phishguard-safe {
+  background: linear-gradient(135deg, rgba(16,185,129,0.12), rgba(16,185,129,0.2));
+  color: #065f46;
+  border: 1.5px solid rgba(16,185,129,0.35);
+  background-color: rgba(220,252,231,0.92);
+}
+.phishguard-safe .phishguard-dot {
+  background-color: #10b981;
+  box-shadow: 0 0 0 2px rgba(16,185,129,0.2);
+}
+.phishguard-safe i {
+  color: #059669;
+  font-weight: 500;
+}
+
+.phishguard-warning {
+  background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(245,158,11,0.2));
+  color: #92400e;
+  border: 1.5px solid rgba(245,158,11,0.35);
+  background-color: rgba(254,243,199,0.92);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+.phishguard-warning .phishguard-dot {
+  background-color: #f59e0b;
+  box-shadow: 0 0 0 2px rgba(245,158,11,0.2);
+}
+.phishguard-warning i {
+  color: #d97706;
+  font-weight: 500;
+}
+
+.phishguard-danger {
+  background: linear-gradient(135deg, rgba(239,68,68,0.12), rgba(239,68,68,0.2));
+  color: #991b1b;
+  border: 1.5px solid rgba(239,68,68,0.35);
+  background-color: rgba(254,226,226,0.92);
+}
+.phishguard-danger .phishguard-dot {
+  background-color: #ef4444;
+  box-shadow: 0 0 0 2px rgba(239,68,68,0.2);
+}
+.phishguard-danger i {
+  color: #dc2626;
+  font-weight: 500;
+}
+
+.phishguard-analysis-panel {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(180deg, #0e1224, #0b0f19);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+  z-index: 10000;
+  max-width: 560px;
+  max-height: 82vh;
+  overflow-y: auto;
+  display: none;
+  color: #e6e9f0;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto;
+}
+
+.phishguard-panel-header {
+  background: rgba(255,255,255,0.04);
+  padding: 16px 18px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px 16px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.phishguard-panel-content { padding: 18px; }
+
+.phishguard-panel-close {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  font-size: 16px;
+  cursor: pointer;
+  color: #e6e9f0;
+  padding: 0;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+}
+
+.phishguard-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.55);
+  z-index: 9999;
+  display: none;
+  backdrop-filter: blur(2px);
+}
+
+.phishguard-url-warning {
+  background: linear-gradient(135deg, rgba(255,204,0,0.15), rgba(255,204,0,0.25));
+  border: 1px solid rgba(255,204,0,0.4);
+  border-radius: 10px;
+  padding: 10px;
+  margin: 6px 0;
+  font-size: 12px;
+  color: #854d0e;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto;
+  text-shadow: 0 1px 2px rgba(255,255,255,0.3);
+}
+
+.phishguard-url-danger {
+  background: linear-gradient(135deg, rgba(255,92,124,0.1), rgba(255,92,124,0.18));
+  border: 1px solid rgba(255,92,124,0.35);
+  border-radius: 10px;
+  padding: 10px;
+  margin: 6px 0;
+  font-size: 12px;
+  color: #e6e9f0;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto;
+}
+
+.explanation-item {
+  background: rgba(255,255,255,0.06);
+  border-left: 4px solid #6c5ce7;
+  padding: 10px 12px;
+  margin: 6px 0;
+  border-radius: 0 10px 10px 0;
+  color: #e6e9f0;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto;
+}
+
+/* Ensure badges don't interfere with email layout */
+.phishguard-badge {
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .phishguard-analysis-panel {
+    max-width: 90vw;
+    max-height: 90vh;
+  }
+  
+  .phishguard-badge {
+    font-size: 12px;
+    padding: 8px 14px 8px 12px;
+    margin-left: 24px;
+    margin-right: 0;
+    gap: 8px;
+    min-height: 32px;
+  }
+  
+  .phishguard-badge i {
+    font-size: 12px;
+    width: 14px;
+    height: 14px;
+  }
+  
+  .phishguard-label-text {
+    font-size: 12px;
+    letter-spacing: 0.8px;
+  }
+}

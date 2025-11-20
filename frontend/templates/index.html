@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhishGuard AI - Advanced Phishing Detection</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #0a0e1a;
+            --bg-secondary: #0f1419;
+            --panel: #1a1f2e;
+            --panel-hover: #232838;
+            --text: #e8eaed;
+            --text-muted: #9aa0a6;
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --accent: #8b5cf6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --gradient-4: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 16px rgba(0,0,0,0.2);
+            --shadow-lg: 0 8px 32px rgba(0,0,0,0.3);
+            --shadow-xl: 0 16px 64px rgba(0,0,0,0.4);
+            --radius: 20px;
+            --radius-sm: 12px;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Animated Background */
+        .animated-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(16, 185, 129, 0.1) 0%, transparent 50%),
+                linear-gradient(180deg, #0a0e1a 0%, #0f1419 100%);
+            animation: bgShift 20s ease infinite;
+        }
+
+        @keyframes bgShift {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.9; }
+        }
+
+        /* Floating Particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(99, 102, 241, 0.3);
+            border-radius: 50%;
+            animation: float 15s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            50% { transform: translateY(-100px) translateX(50px) rotate(180deg); }
+        }
+
+        /* Navigation */
+        .navbar {
+            background: rgba(26, 31, 46, 0.8) !important;
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding: 1rem 0;
+            transition: all 0.3s ease;
+        }
+
+        .navbar.scrolled {
+            background: rgba(26, 31, 46, 0.95) !important;
+            box-shadow: var(--shadow-md);
+        }
+
+        .navbar-brand {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 1.5rem;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .navbar-brand i {
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 1.8rem;
+        }
+
+        .nav-link {
+            color: var(--text-muted) !important;
+            font-weight: 500;
+            margin: 0 0.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gradient-1);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--text) !important;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            min-height: 90vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            padding: 6rem 0;
+            overflow: hidden;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #ffffff 0%, #a8b0c3 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1.1rem, 2vw, 1.5rem);
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            animation: fadeInUp 0.8s ease 0.2s both;
+        }
+
+        .hero-description {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            margin-bottom: 2.5rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            animation: fadeInUp 0.8s ease 0.4s both;
+        }
+
+        .hero-cta {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeInUp 0.8s ease 0.6s both;
+        }
+
+        .btn-hero {
+            padding: 1rem 2.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: var(--radius-sm);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary-hero {
+            background: var(--gradient-1);
+            color: white;
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-primary-hero:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(99, 102, 241, 0.5);
+        }
+
+        .btn-secondary-hero {
+            background: rgba(255,255,255,0.05);
+            color: var(--text);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .btn-secondary-hero:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateY(-2px);
+        }
+
+        /* Features Section */
+        .features-section {
+            padding: 6rem 0;
+            position: relative;
+        }
+
+        .section-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #ffffff 0%, #a8b0c3 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            margin-bottom: 4rem;
+        }
+
+        .feature-card {
+            background: rgba(26, 31, 46, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: var(--radius);
+            padding: 2.5rem;
+            height: 100%;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            border-color: rgba(99, 102, 241, 0.3);
+            box-shadow: 0 20px 60px rgba(99, 102, 241, 0.2);
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            z-index: 1;
+            transition: all 0.4s ease;
+        }
+
+        .feature-card:nth-child(1) .feature-icon {
+            background: var(--gradient-1);
+        }
+
+        .feature-card:nth-child(2) .feature-icon {
+            background: var(--gradient-4);
+        }
+
+        .feature-card:nth-child(3) .feature-icon {
+            background: var(--gradient-2);
+        }
+
+        .feature-card:hover .feature-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .feature-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .feature-text {
+            color: var(--text-muted);
+            line-height: 1.8;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Demo Section */
+        .demo-section {
+            padding: 6rem 0;
+            background: rgba(15, 20, 25, 0.5);
+            backdrop-filter: blur(20px);
+        }
+
+        .demo-card {
+            background: rgba(26, 31, 46, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: var(--radius);
+            padding: 2.5rem;
+            box-shadow: var(--shadow-xl);
+        }
+
+        .demo-card-header {
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .demo-card-header h5 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .form-control, textarea {
+            background: rgba(15, 20, 25, 0.6) !important;
+            border: 1px solid rgba(255,255,255,0.1) !important;
+            color: var(--text) !important;
+            border-radius: var(--radius-sm) !important;
+            padding: 0.875rem 1.25rem !important;
+            transition: all 0.3s ease !important;
+        }
+
+        .form-control:focus, textarea:focus {
+            background: rgba(15, 20, 25, 0.8) !important;
+            border-color: var(--primary) !important;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important;
+            outline: none !important;
+        }
+
+        .form-control::placeholder {
+            color: var(--text-muted) !important;
+        }
+
+        .form-label {
+            color: var(--text);
+            font-weight: 500;
+            margin-bottom: 0.75rem;
+        }
+
+        .btn-analyze {
+            background: var(--gradient-1);
+            border: none;
+            padding: 1rem 2.5rem;
+            font-weight: 600;
+            border-radius: var(--radius-sm);
+            color: white;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-analyze:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(99, 102, 241, 0.5);
+        }
+
+        /* Results Display */
+        .analysis-result {
+            background: rgba(26, 31, 46, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: var(--radius);
+            padding: 2rem;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .safe-result {
+            border-left: 4px solid var(--success);
+        }
+
+        .phishing-result {
+            border-left: 4px solid var(--danger);
+        }
+
+        .warning-result {
+            border-left: 4px solid var(--warning);
+        }
+
+        .progress {
+            height: 16px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.05);
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            border-radius: 10px;
+            transition: width 1s ease;
+        }
+
+        .explanation-item {
+            background: rgba(99, 102, 241, 0.1);
+            border-left: 3px solid var(--primary);
+            padding: 1rem;
+            margin: 0.75rem 0;
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+            transition: all 0.3s ease;
+        }
+
+        .explanation-item:hover {
+            background: rgba(99, 102, 241, 0.15);
+            transform: translateX(5px);
+        }
+
+        /* Chrome Extension Section */
+        .extension-section {
+            padding: 6rem 0;
+            position: relative;
+        }
+
+        .extension-card {
+            background: var(--gradient-1);
+            border-radius: var(--radius);
+            padding: 4rem 3rem;
+            box-shadow: var(--shadow-xl);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .extension-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .extension-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .extension-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: white;
+        }
+
+        .extension-text {
+            font-size: 1.1rem;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 2rem;
+            line-height: 1.8;
+        }
+
+        .extension-features {
+            list-style: none;
+            padding: 0;
+        }
+
+        .extension-features li {
+            padding: 0.75rem 0;
+            color: rgba(255,255,255,0.9);
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .extension-features i {
+            color: var(--success);
+            font-size: 1.25rem;
+        }
+
+        .btn-extension {
+            background: white;
+            color: var(--primary);
+            padding: 1rem 2.5rem;
+            font-weight: 600;
+            border-radius: var(--radius-sm);
+            border: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        }
+
+        .btn-extension:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.3);
+        }
+
+        /* Footer */
+        footer {
+            background: rgba(15, 20, 25, 0.8);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255,255,255,0.05);
+            padding: 2rem 0;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 0.8s ease both;
+        }
+
+        /* Scroll Animations */
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.8s ease;
+        }
+
+        .scroll-reveal.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Loading Spinner */
+        .spinner-custom {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(99, 102, 241, 0.1);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-section {
+                min-height: 70vh;
+                padding: 3rem 0;
+            }
+
+            .features-section, .demo-section, .extension-section {
+                padding: 3rem 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="animated-bg"></div>
+    <div class="particles" id="particles"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-shield-alt"></i> PhishGuard AI
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="navbar-nav ms-auto">
+                    <a class="nav-link" href="#features">Features</a>
+                    <a class="nav-link" href="#demo">Demo</a>
+                    <a class="nav-link" href="#extension">Extension</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="hero-content text-center">
+                <h1 class="hero-title">PhishGuard AI</h1>
+                <p class="hero-subtitle">Advanced AI-Powered Phishing Detection</p>
+                <p class="hero-description">
+                    Protect yourself from sophisticated phishing attacks with our cutting-edge machine learning models 
+                    that provide transparent, explainable insights into potential threats.
+                </p>
+                <div class="hero-cta">
+                    <button class="btn btn-hero btn-primary-hero" onclick="scrollToDemo()">
+                        <i class="fas fa-play me-2"></i> Try Demo
+                    </button>
+                    <button class="btn btn-hero btn-secondary-hero" onclick="scrollToExtension()">
+                        <i class="fas fa-download me-2"></i> Get Extension
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features-section">
+        <div class="container">
+            <h2 class="section-title scroll-reveal">Key Features</h2>
+            <p class="section-subtitle scroll-reveal">Powerful capabilities to keep you safe</p>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="feature-card scroll-reveal">
+                        <div class="feature-icon">
+                            <i class="fas fa-envelope text-white"></i>
+                        </div>
+                        <h5 class="feature-title">Email Analysis</h5>
+                        <p class="feature-text">
+                            Advanced NLP models analyze email content for phishing indicators with 96%+ accuracy. 
+                            Real-time detection of suspicious patterns and malicious intent.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card scroll-reveal">
+                        <div class="feature-icon">
+                            <i class="fas fa-link text-white"></i>
+                        </div>
+                        <h5 class="feature-title">URL Detection</h5>
+                        <p class="feature-text">
+                            Comprehensive URL analysis using lexical, structural, and domain anomaly detection. 
+                            Identifies malicious links before you click.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card scroll-reveal">
+                        <div class="feature-icon">
+                            <i class="fas fa-brain text-white"></i>
+                        </div>
+                        <h5 class="feature-title">Explainable AI</h5>
+                        <p class="feature-text">
+                            Transparent decision-making with clear explanations of why content is flagged as phishing. 
+                            Understand the reasoning behind every detection.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo Section -->
+    <section id="demo" class="demo-section">
+        <div class="container">
+            <h2 class="section-title scroll-reveal">Try PhishGuard AI</h2>
+            <p class="section-subtitle scroll-reveal">Test our detection system with your own content</p>
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <div class="demo-card scroll-reveal">
+                        <div class="demo-card-header">
+                            <h5><i class="fas fa-flask text-primary"></i> Analysis Tool</h5>
+                        </div>
+                        <div class="mb-4">
+                            <label for="emailText" class="form-label">Email Content</label>
+                            <textarea class="form-control" id="emailText" rows="6" 
+                                placeholder="Paste email content here to analyze for phishing indicators..."></textarea>
+                        </div>
+                        <div class="mb-4">
+                            <label for="urls" class="form-label">URLs (one per line)</label>
+                            <textarea class="form-control" id="urls" rows="3" 
+                                placeholder="Enter URLs found in the email (optional)..."></textarea>
+                        </div>
+                        <button class="btn btn-analyze w-100" onclick="analyzeContent()">
+                            <i class="fas fa-search me-2"></i> Analyze Content
+                        </button>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div id="analysisResults" class="scroll-reveal">
+                        <div class="text-center text-muted" style="padding: 4rem 2rem;">
+                            <i class="fas fa-arrow-left fa-3x mb-4" style="opacity: 0.3;"></i>
+                            <p style="font-size: 1.1rem;">Enter email content and click "Analyze Content" to see results</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Chrome Extension Section -->
+    <section id="extension" class="extension-section">
+        <div class="container">
+            <div class="extension-card">
+                <div class="extension-content">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h3 class="extension-title">
+                                <i class="fab fa-chrome me-3"></i> Chrome Extension
+                            </h3>
+                            <p class="extension-text">
+                                Get real-time phishing protection while browsing. Our Chrome extension integrates 
+                                seamlessly with your browser to provide instant analysis of emails and URLs.
+                            </p>
+                            <ul class="extension-features">
+                                <li><i class="fas fa-check-circle"></i> Real-time email analysis in Gmail</li>
+                                <li><i class="fas fa-check-circle"></i> URL scanning before clicking</li>
+                                <li><i class="fas fa-check-circle"></i> Explainable AI insights</li>
+                                <li><i class="fas fa-check-circle"></i> Privacy-focused design</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <i class="fab fa-chrome" style="font-size: 8rem; opacity: 0.3; margin-bottom: 2rem;"></i>
+                            <br>
+                            <button class="btn btn-extension" onclick="downloadExtension()">
+                                <i class="fas fa-download me-2"></i> Download Extension
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white">
+        <div class="container text-center">
+            <p class="mb-0">&copy; 2024 PhishGuard AI. Advanced phishing detection with explainable AI.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Create floating particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 20;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                const size = Math.random() * 4 + 2;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', function() {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Scroll reveal animation
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('revealed');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.scroll-reveal').forEach(el => {
+            observer.observe(el);
+        });
+
+        function scrollToDemo() {
+            document.getElementById('demo').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function scrollToExtension() {
+            document.getElementById('extension').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function analyzeContent() {
+            const emailText = document.getElementById('emailText').value.trim();
+            const urlsText = document.getElementById('urls').value.trim();
+            
+            if (!emailText && !urlsText) {
+                showNotification('Please enter email content or URLs to analyze.', 'warning');
+                return;
+            }
+
+            const urls = urlsText ? urlsText.split('\n').filter(url => url.trim()) : [];
+            
+            showLoading();
+            
+            const payload = {
+                email_text: emailText,
+                urls: urls
+            };
+
+            fetch('/api/analyze_combined', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                displayResults(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showError('An error occurred while analyzing the content.');
+            });
+        }
+
+        function showLoading() {
+            document.getElementById('analysisResults').innerHTML = `
+                <div class="text-center" style="padding: 4rem 2rem;">
+                    <div class="spinner-custom mx-auto mb-3"></div>
+                    <p class="text-muted">Analyzing content...</p>
+                </div>
+            `;
+        }
+
+        function displayResults(data) {
+            const resultsDiv = document.getElementById('analysisResults');
+            
+            if (data.error) {
+                showError(data.error);
+                return;
+            }
+
+            const riskScore = data.combined_risk_score || 0;
+            const isPhishing = data.overall_prediction === 'phishing';
+            
+            let resultClass = 'safe-result';
+            let icon = 'fas fa-check-circle';
+            let status = 'SAFE';
+            let statusColor = 'var(--success)';
+            
+            if (riskScore > 70) {
+                resultClass = 'phishing-result';
+                icon = 'fas fa-exclamation-triangle';
+                status = 'PHISHING DETECTED';
+                statusColor = 'var(--danger)';
+            } else if (riskScore > 30) {
+                resultClass = 'warning-result';
+                icon = 'fas fa-exclamation-circle';
+                status = 'SUSPICIOUS';
+                statusColor = 'var(--warning)';
+            }
+
+            let html = `
+                <div class="analysis-result ${resultClass}">
+                    <div class="d-flex align-items-center mb-4">
+                        <i class="${icon} me-3" style="font-size: 2.5rem; color: ${statusColor};"></i>
+                        <h4 class="mb-0" style="color: ${statusColor};">${status}</h4>
+                    </div>
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between mb-2">
+                            <label class="form-label mb-0">Risk Score</label>
+                            <strong style="color: ${statusColor};">${riskScore.toFixed(1)}%</strong>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar ${isPhishing ? 'bg-danger' : riskScore > 30 ? 'bg-warning' : 'bg-success'}" 
+                                 role="progressbar" style="width: ${riskScore}%"></div>
+                        </div>
+                    </div>
+            `;
+
+            if (data.email_analysis) {
+                html += `
+                    <div class="mb-3 p-3" style="background: rgba(99, 102, 241, 0.1); border-radius: var(--radius-sm);">
+                        <h6 class="mb-2"><i class="fas fa-envelope me-2"></i>Email Analysis</h6>
+                        <p class="mb-0"><strong>Risk Score:</strong> ${data.email_analysis.risk_score.toFixed(1)}%</p>
+                    </div>
+                `;
+            }
+
+            if (data.url_analyses && data.url_analyses.length > 0) {
+                html += `<h6 class="mb-3"><i class="fas fa-link me-2"></i>URL Analysis</h6>`;
+                data.url_analyses.forEach(urlAnalysis => {
+                    html += `
+                        <div class="mb-2 p-3" style="background: rgba(99, 102, 241, 0.1); border-radius: var(--radius-sm);">
+                            <strong>URL:</strong> <code style="color: var(--text-muted);">${urlAnalysis.url}</code><br>
+                            <strong>Risk Score:</strong> ${urlAnalysis.analysis.risk_score.toFixed(1)}%
+                        </div>
+                    `;
+                });
+            }
+
+            if (data.explanations && data.explanations.length > 0) {
+                html += `
+                    <h6 class="mb-3 mt-4"><i class="fas fa-lightbulb me-2"></i>Explanations</h6>
+                    <div class="explanations">
+                `;
+                data.explanations.forEach(explanation => {
+                    html += `<div class="explanation-item">${explanation}</div>`;
+                });
+                html += `</div>`;
+            }
+
+            html += `
+                <div class="mt-4 pt-3" style="border-top: 1px solid rgba(255,255,255,0.1);">
+                    <small class="text-muted">
+                        <i class="fas fa-clock me-2"></i>Analyzed at ${new Date(data.timestamp).toLocaleString()}
+                    </small>
+                </div>
+            </div>
+            `;
+
+            resultsDiv.innerHTML = html;
+        }
+
+        function showError(message) {
+            document.getElementById('analysisResults').innerHTML = `
+                <div class="alert alert-danger" role="alert" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: var(--danger);">
+                    <i class="fas fa-exclamation-triangle me-2"></i>${message}
+                </div>
+            `;
+        }
+
+        function showNotification(message, type) {
+            // Simple notification - can be enhanced with a toast library
+            alert(message);
+        }
+
+        function downloadExtension() {
+            showNotification('Chrome extension download will be available soon! Check the extension folder for installation instructions.', 'info');
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+            
+            // Add sample email placeholder
+            const sampleEmail = `Subject: URGENT: Verify Your Account Immediately
+
+Dear Customer,
+
+We have detected unusual activity on your account. To prevent suspension, please verify your information immediately by clicking the link below.
+
+Click here: https://secure-verify-account.com/login
+
+This is urgent and must be completed within 24 hours.
+
+Best regards,
+Security Team`;
+
+            document.getElementById('emailText').placeholder = sampleEmail;
+        });
+    </script>
+</body>
+</html>
