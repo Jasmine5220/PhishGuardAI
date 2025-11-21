@@ -90,13 +90,6 @@ Bar chart plotted for Accuracy, F1, Recall, Precision comparing both models.
 - No missing data handling needed (dataset contains no nulls).
 - Evaluation mixes masked binary metrics and multi-class report; keep this in mind when comparing.
 
-## Suggested Improvements
-- Calibrate probabilities (e.g., Platt scaling or isotonic) for better risk scoring.
-- Cross-validation for robustness across folds.
-- Increase `n_estimators` and tune RF depth/feature settings.
-- Consider handling of class 0 explicitly (tri-class evaluation and thresholds).
-- Add feature importance plots to interpret RF decisions.
-
 ## Artifacts
 - Trained model: `random_forest_model.pkl`
 - Feature generator: `feature.py: FeatureExtraction`
