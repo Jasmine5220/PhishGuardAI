@@ -1,5 +1,4 @@
-# PhishGuard AI - Complete System Documentation
-
+# PhishGuard AI 
 ## Project Overview
 
 PhishGuard AI is a sophisticated AI-powered system designed to combat phishing threats through three core components:
@@ -202,21 +201,6 @@ python app.py
 - Anonymous analysis processing
 - Local model execution
 - Transparent data handling
-
-## Future Enhancements
-
-### Planned Features
-1. **Advanced ML Models:** Deep learning integration
-2. **Multi-language Support:** International phishing detection
-3. **Real-time Learning:** Adaptive model updates
-4. **Mobile Extension:** iOS and Android support
-5. **Enterprise Features:** Admin dashboard and reporting
-
-### Technical Improvements
-1. **Model Optimization:** Faster inference and reduced memory usage
-2. **Feature Engineering:** Advanced text and URL feature extraction
-3. **Ensemble Methods:** Multiple model combination for better accuracy
-4. **API Scaling:** Microservices architecture for production deployment
 
 ## Conclusion
 
