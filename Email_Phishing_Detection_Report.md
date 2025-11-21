@@ -272,7 +272,7 @@ The system provides a solid foundation for email security applications and demon
 
 ---
 
-**Report Generated**: December 2024  
+**Report Generated**: October 2025  
 **Model Performance**: 96.28% Accuracy  
 **Dataset Size**: 164,966 emails  
 **Implementation**: Python, scikit-learn, SVM
