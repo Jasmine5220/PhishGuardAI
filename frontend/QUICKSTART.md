@@ -84,12 +84,6 @@ Click the PhishGuard AI icon in your browser toolbar to:
 - Email content processed in memory only
 - Secure local API communication
 
-## 📚 Learn More
-
-- Check `frontend/README.md` for detailed documentation
-- Review `chrome-extension/README.md` for extension details
-- Visit the web dashboard for interactive demos
-
 ---
 
 **PhishGuard AI** - Advanced phishing detection with explainable AI insights
